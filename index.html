@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Address select autocomplete</title>
+    <script type="text/javascript" src="jquery.min.js"></script>
+    <script src="chosen.jquery.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="chosen.css">
+</head>
+<body>
+
+    <div >
+        <!-- <input type="text" id="postcode"> -->
+        <select class="select-address" name="" id="postcode" data-placeholder="Choose a postcode..." style="width:350px;"></select>
+        <br><br>
+        province:<select id="province" class="select-address"  style="width:350px;" data-placeholder="Choose a province..."></select>
+        <br><br>
+        City:<select id="city" class="select-address"  style="width:350px;" data-placeholder="Choose a city..."></select>
+
+        <br><br>
+        district:<select id="district" class="select-address"  style="width:350px;" data-placeholder="Choose a district..."></select>
+
+
+    </div>
+    <br />
+
+    <script type="text/javascript">
+        var data;
+        // $.getJSON("localtion-zipcode.min.json", function(data) {
+            filterAddressFormPostcode(data);
+        // });
+
+        function filterAddressFormPostcode(data) {
+            var dataAddress = data;
+            if (!data) {
+                dataAddress = [
+                {
+                    "postcode": 10200,
+                    "province": "กรุงเทพมหานคร",
+                    "city": "พระนคร",
+                    "district": "พระบรมมหาราชวัง"
+                },
+                {
+                    "postcode": 10200,
+                    "province": "กรุงเทพมหานคร",
+                    "city": "พระนคร",
+                    "district": "วังบูรพาภิรมย์"
+                },
+                {
+                    "postcode": 10200,
+                    "province": "กรุงเทพมหานคร",
+                    "city": "พระนคร",
+                    "district": "วัดราชบพิธ"
+                }];
+            }
+            var postcodeArray = [];
+            var provinceArray = [];
+
+        // adding unique postcode to postcodeArray
+        $.each(dataAddress, function (index) {
+            var postcode = dataAddress[index].postcode;
+            if ($.inArray(postcode, postcodeArray) == -1) {
+                postcodeArray.push(postcode);
+            }
+        });
+
+        //sorting the year
+        // yearsArray.sort();
+        var $postCode = $("#postcode");
+        var $province = $("#province");
+        var $city = $("#city");
+        var $district = $("#district");
+        var $container = $("#details").find("tbody");
+        // append the years to select
+        $postCode.append('<option></option>');
+        $.each(postcodeArray, function (i) {
+            $postCode.append('<option value="' + postcodeArray[i] + '">' + postcodeArray[i] + '</option>');
+        });
+
+        var provinceObj;
+        $postCode.chosen().change(function(evt, params) {
+            if(this.value.length == 5) {
+
+                // filter province by postCode
+                var thisPostcode = this.value;
+                provinceObj = jQuery.grep(dataAddress, function (address, i) {
+                    return address.postcode == thisPostcode;
+                });
+
+                // convert province object to array
+                var provinceArray = $.map(provinceObj, function(value, index) {
+                    return [value.province];
+                });
+
+                // adding unique province
+                var uniqueProvince = [];
+                $.each(provinceArray, function(i, el){
+                    if($.inArray(el, uniqueProvince) === -1) uniqueProvince.push(el);
+                });
+
+                // add option into select province
+                $province.empty();
+                $province.append('<option></option>');
+                for (var i = 0; i < uniqueProvince.length; i++) {
+                    province = uniqueProvince[i];
+                    $province.append('<option value="' + province + '">' + province + '</option>');
+                }
+                $province.trigger("chosen:updated");
+
+                $city.empty().trigger("chosen:updated");
+                $district.empty().trigger("chosen:updated");
+            } else {
+                return false;
+            }
+        });
+
+        var cityObj;
+        $province.chosen().change(function (evt, params) {
+            if(this.value) {
+                // console.log(this.value);
+
+                // filter province by postCode
+                var thisProvince = this.value;
+                cityObj = jQuery.grep(provinceObj, function (address, i) {
+                    return address.province == thisProvince;
+                });
+
+
+                // convert city object to array
+                var cityArray = $.map(cityObj, function(value, index) {
+                    return [value.city];
+                });
+                console.log(cityArray);
+
+
+                // adding unique city
+                var uniqueCity = [];
+                $.each(cityArray, function(i, el){
+                    if($.inArray(el, uniqueCity) === -1) uniqueCity.push(el);
+                });
+                // console.log(uniqueCity);
+
+
+                // // add option into select City
+                $city.empty();
+                $city.append('<option></option>');
+                for (var i = 0; i < uniqueCity.length; i++) {
+                    city = uniqueCity[i];
+                    $city.append('<option value="' + city + '">' + city + '</option>');
+                }
+
+                $city.trigger("chosen:updated");
+
+                $district.empty().trigger("chosen:updated");
+            } else {
+                return false;
+            }
+
+        });
+
+        var districtObj;
+        $city.chosen().change(function(evt, params) {
+            if(this.value) {
+                // console.log(this.value);
+
+                // filter province by postCode
+                var thisCity = this.value;
+                districtObj = jQuery.grep(cityObj, function (address, i) {
+                    return address.city == thisCity;
+                });
+                // console.log(districtObj);
+
+
+                // convert district object to array
+                var districtArray = $.map(districtObj, function(value, index) {
+                    return [value.district];
+                });
+                // console.log(districtArray);
+
+
+                // adding unique district
+                var uniqueDistrict = [];
+                $.each(districtArray, function(i, el){
+                    if($.inArray(el, uniqueDistrict) === -1) uniqueDistrict.push(el);
+                });
+                // console.log(uniqueDistrict);
+
+
+                // // add option into select City
+                $district.empty();
+                $district.append('<option></option>');
+                for (var i = 0; i < uniqueDistrict.length; i++) {
+                    district = uniqueDistrict[i];
+                    $district.append('<option value="' + district + '">' + district + '</option>');
+                }
+
+                $district.trigger("chosen:updated");
+            } else {
+                return false;
+            }
+        });
+
+        $district.chosen().change(function(evt, params) {
+            // console.log('eiei');
+        });
+
+    }
+
+</script>
+</body>
+</html>
